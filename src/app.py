@@ -2,6 +2,7 @@ import pandas as pd
 import streamlit as st
 import math
 from popviz import PopVisualization
+from hdiviz import HdiVisualization
 
 from settings import DATASET_DIR
 from settings import SRC_DIR
@@ -33,6 +34,8 @@ def viewData(dataframe):
     
     # Display "Page X of Y" indicator
     st.text(f"Page {page_number} of {total_pages}")
+    st.subheader("Overview of data")
+    st.table(dataframe.describe())
 
 
 def main():
@@ -42,7 +45,9 @@ def main():
     clean_df = raw_data.dropna()
     
     
-    viz = PopVisualization(clean_df)
+    pop_viz = PopVisualization(clean_df)
+    hdi_viz = HdiVisualization(clean_df)
+    
     
     st.sidebar.subheader("Select one or more option")
     
@@ -50,20 +55,27 @@ def main():
     pop_growth_rate = st.sidebar.checkbox('Population growth rate')
     region_wise_pop = st.sidebar.checkbox('Region wise population')
     region_pop_dist = st.sidebar.checkbox('Region wise population distribution')
-    
+    hdi_view = st.sidebar.checkbox('Visualize HDI 2020/21')
+    stat_test = st.sidebar.checkbox("Perform statistical analysis")
     
     if view_dataset:
         viewData(clean_df)
     
     if pop_growth_rate:
-        viz.popVsPopGrowth()
+        pop_viz.popVsPopGrowth()
     
     if region_wise_pop:
-        viz.regionPop()
+        pop_viz.regionPop()
         
     if region_pop_dist:
-        viz.regionMemPop()
+        pop_viz.regionMemPop()
+        
+    if hdi_view:
+        hdi_viz.scattViz()
 
+    if stat_test:
+        st.sidebar.radio('Choose tests', 
+                         ('Wilcoxon Signed-Ranked Test', 'Paired T-test'))
 
 if __name__ == '__main__':
     main()
